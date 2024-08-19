@@ -39,8 +39,11 @@ namespace crud_app.Controllers
             var isLoggedIn = await _userRepository.Login(request.Username, request.Password);
             if (isLoggedIn)
             {
-                var token = this._jwtToken.TokenGenerator(request.Username, request.Password); // Generar el token JWT
-                return Ok(new { token });
+                var token = _jwtToken.TokenGenerator(request.Username, request.Password); // Generar el token JWT
+                return Ok(new { 
+                    token,
+                    username = request.Username,
+                });
             }
             return Unauthorized("Invalid username or password.");
         }
