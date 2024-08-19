@@ -47,6 +47,19 @@ namespace crud_app.Repositories
             throw new KeyNotFoundException($"Entity with id '{id}' not found");
         }
 
+        public async Task<bool> Login(string username, string password)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            // Verificar si el usuario existe
+            if (user == null)
+            {
+                return false; // Usuario no encontrado
+            }
+            var token = this._jwtToken.TokenGenerator(username, password);
+            return user.Password_hash == password;
+        }
+
 
         public async Task UpdateAndSave(User user)
         {
@@ -59,18 +72,5 @@ namespace crud_app.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> Login(string username, string password)
-        {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
-
-            // Verificar si el usuario existe
-            if (user is not null)
-            {
-                var token = this._jwtToken.TokenGenerator(username, password);
-
-                return token;
-            }
-            return "Usuario no encontrado";
-        }
     }
 }

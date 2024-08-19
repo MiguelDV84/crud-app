@@ -5,7 +5,7 @@ namespace crud_app.Repositories
     public interface IUserRepository
     {
         Task<User> GetByIdAsync(int id);
-        Task<string> Login(string username, string password);
+        Task<bool> Login(string username, string password);
         Task<IEnumerable<User>> GetAllAsync();
         Task CreateAndSave (User user);
         Task UpdateAndSave (User user);

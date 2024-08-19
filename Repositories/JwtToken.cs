@@ -14,12 +14,12 @@ namespace crud_app.Repositories
             this.configuration = configuration;
         }
 
-        public string TokenGenerator(string email, string fullname)
+        public string TokenGenerator(string email, string password)
         {
             var claims = new[]
             {
                 new Claim("email", email),
-                new Claim("fullname", fullname)
+                new Claim("password", password)
             };
 
             var key = new SymmetricSecurityKey(

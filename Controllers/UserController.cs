@@ -1,6 +1,7 @@
 ﻿using crud_app.Controllers.Request;
 using crud_app.Domain;
 using crud_app.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace crud_app.Controllers
@@ -10,9 +11,11 @@ namespace crud_app.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        public UserController(IUserRepository userRepository)
+        private readonly IJwtToken _jwtToken;
+        public UserController(IUserRepository userRepository, IJwtToken jwtToken)
         {
             _userRepository = userRepository;
+            _jwtToken = jwtToken;
         }
 
         [HttpGet]
@@ -29,15 +32,17 @@ namespace crud_app.Controllers
             return Ok(user);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var isLoggedIn = await _userRepository.Login(request.Username, request.Password);
-            if (isLoggedIn is not null)
+            if (isLoggedIn)
             {
-                return Ok("Logged in successfully");
+                var token = this._jwtToken.TokenGenerator(request.Username, request.Password); // Generar el token JWT
+                return Ok(new { token });
             }
-            return Unauthorized(); 
+            return Unauthorized("Invalid username or password.");
         }
 
         [HttpPost]
