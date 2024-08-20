@@ -36,10 +36,10 @@ namespace crud_app.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var isLoggedIn = await _userRepository.Login(request.Username, request.Password);
+            var isLoggedIn = await _userRepository.Login(request.Username, request.Email, request.Password);
             if (isLoggedIn)
             {
-                var token = _jwtToken.TokenGenerator(request.Username, request.Password); // Generar el token JWT
+                var token = _jwtToken.TokenGenerator(request.Username,request.Email, request.Password); // Generar el token JWT
                 return Ok(new { 
                     token,
                     username = request.Username,
@@ -48,6 +48,7 @@ namespace crud_app.Controllers
             return Unauthorized("Invalid username or password.");
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Create(User user)
         {

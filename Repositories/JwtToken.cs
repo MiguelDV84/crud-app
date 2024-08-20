@@ -14,11 +14,11 @@ namespace crud_app.Repositories
             this.configuration = configuration;
         }
 
-        public string TokenGenerator(string email, string password)
+        public string TokenGenerator(string? email, string? username, string password)
         {
             var claims = new[]
             {
-                new Claim("email", email),
+                new Claim("email", email ?? username),
                 new Claim("password", password)
             };
 

@@ -17,7 +17,9 @@ namespace crud_app.Repositories
     
         public async Task CreateAndSave(User user)
         {
-           _context.Users.Add(user);
+            var password = BCrypt.Net.BCrypt.HashPassword(user.Password_hash);
+            user.Password_hash = password;
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
 
@@ -47,17 +49,26 @@ namespace crud_app.Repositories
             throw new KeyNotFoundException($"Entity with id '{id}' not found");
         }
 
-        public async Task<bool> Login(string username, string password)
+        public async Task<bool> Login(string? username, string? email, string password)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+            if (string.IsNullOrWhiteSpace(username) && string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentException("Debes proporcionar al menos un nombre de usuario o un correo electrónico.");
+            }
+
+            // Buscar el usuario basado en el username o email
+            var user = await _context.Users.SingleOrDefaultAsync(u =>
+                (username != null && u.Username == username) ||
+                (email != null && u.Email == email)
+            );
 
             // Verificar si el usuario existe
             if (user == null)
             {
                 return false; // Usuario no encontrado
             }
-            var token = this._jwtToken.TokenGenerator(username, password);
-            return user.Password_hash == password;
+            var token = this._jwtToken.TokenGenerator(username,email,password);
+            return BCrypt.Net.BCrypt.Verify(password, user.Password_hash);
         }
 
 
